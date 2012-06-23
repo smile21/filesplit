@@ -25,7 +25,7 @@ describe('file split', function () {
     var caller  = splitor.create(['/i/am/not/exists']);
     caller(function (error, result) {
       should.ok(error);
-      error.should.have.property('name', 'FileOpenError');
+      error.should.have.property('name', 'StreamReadError');
       error.message.should.include('/i/am/not/exists');
       done();
     });

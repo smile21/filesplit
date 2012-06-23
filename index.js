@@ -101,69 +101,50 @@ exports.create = function (flist, prefix, options) {
       return _complete(null, _result);
     }
 
-    fs.open(fname, 'r', 0666, function (error, fd) {
-      if (error) {
-        return _complete(iError('FileOpenError', error.stack));
+    var reader  = fs.createReadStream(fname, {
+      'flags'   : 'r',
+        'mode'  : 0666,
+        'encoding'  : _options.encoding,
+        'bufferSize': _options.bufferSize,
+    });
+    reader.on('error', function (error) {
+      _complete(iError('StreamReadError', error.stack));
+    });
+
+    var _tail = '';
+    reader.on('data', function (data) {
+      var rows  = (_tail + data).split(_options.EOL);
+      _tail  = rows.pop();
+
+      for (var i = 0, m = rows.length; i < m; i++) {
+        var row = rows[i].split(_options.EOF);
+        var idx = _getRoute(row);
+        var txt = _buildRow(row) + _options.EOL;
+
+        if (undefined === _wcache[idx]) {
+          _wcache[idx]  = txt;
+          _writer[idx]  = _createWriter(idx);
+          _wlines[idx]  = 0;
+        } else {
+          _wcache[idx] += txt;
+        }
+
+        _wlines[idx]++;
+
+        if (_wcache[idx].length >= _options.bufferSize || _wlines[idx] >= _options.maxLines) {
+          _writer[idx].write(_wcache[idx]);
+          _wcache[idx]  = '';
+          if (_wlines[idx] >= _options.maxLines) {
+            _writer[idx].end();
+            _writer[idx] = _createWriter(idx);
+            _wlines[idx] = 0;
+          }
+        }
       }
+    });
 
-      var chunk = new Buffer(_options.bufferSize);
-      var _tail = '';
-      var _read = function () {
-        fs.read(fd, chunk, 0, _options.bufferSize, -1, function (error, size, data) {
-          if (error) {
-            fs.closeSync(fd);
-            fd  = null;
-            return _complete(iError('FileReadError', error.stack));
-          }
-
-          var isend = false;
-          if (size < _options.bufferSize) {
-            fs.closeSync(fd);
-            fd  = null;
-
-            isend   = true;
-            process.nextTick(function () {
-              _readfile(flist.shift());
-            });
-          } else {
-            process.nextTick(_read);
-          }
-
-          // XXX: encoding support
-          var rows  = (_tail + data).split(_options.EOL);
-          if (!isend) {
-            _tail  = rows.pop();
-          }
-
-          for (var i = 0, m = rows.length; i < m; i++) {
-            var row = rows[i].split(_options.EOF);
-            // TODO: trim
-            var idx = _getRoute(row);
-            var txt = _buildRow(row) + _options.EOL;
-
-            if (undefined === _wcache[idx]) {
-              _wcache[idx]  = txt;
-              _writer[idx]  = _createWriter(idx);
-              _wlines[idx]  = 0;
-            } else {
-              _wcache[idx] += txt;
-            }
-
-            _wlines[idx]++;
-
-            if (_wcache[idx].length >= _options.bufferSize || _wlines[idx] >= _options.maxLines) {
-              _writer[idx].write(_wcache[idx]);
-              _wcache[idx]  = '';
-              if (_wlines[idx] >= _options.maxLines) {
-                _writer[idx].end();
-                _writer[idx] = _createWriter(idx);
-                _wlines[idx] = 0;
-              }
-            }
-          }
-        });
-      };
-      _read();
+    reader.on('end', function () {
+      _readfile(flist.shift());
     });
   };
 
