@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/aleafs/filesplit.png?branch=v2.0)](http://travis-ci.org/aleafs/filesplit)
+[![Build Status](https://secure.travis-ci.org/aleafs/filesplit.png?branch=master)](http://travis-ci.org/aleafs/filesplit)
 
 # Contributors #
 
@@ -6,8 +6,7 @@ Thanks goes to the people who have contributed code to this module, see the [Git
 
 # License #
 
-The MIT License
-------------------
+(The MIT License)
 
 Copyright (c) 2012 aleafs and other filesplit contributors
 
