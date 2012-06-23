@@ -33,8 +33,8 @@ describe('file split', function () {
   /* }}} */
 
   it('should_file_split_works_fine', function (done) {
-    var _input  = [__dirname + '/test_input_1.txt', __dirname + '/test_input_2.txt'];
-    var caller  = splitor.create(_input, __dirname + '/output/test_input', {
+    var _input  = [__dirname + '/res/test_input_1.txt', __dirname + '/res/test_input_2.txt'];
+    var caller  = splitor.create(_input, __dirname + '/res/output', {
       'EOF' : String.fromCharCode(1),
         'bufferSize'    : 1024,
         'maxLines'      : 30,
