@@ -3,7 +3,15 @@
 var should  = require('should');
 var splitor = require(__dirname + '/../');
 
+var cleanOutput = function (callback) {
+  require('child_process').exec('/bin/rm -f ' + __dirname + '/res/output*', {}, callback);
+};
+
 describe('file split', function () {
+
+  beforeEach(function (done) {
+    cleanOutput(done);
+  });
 
   /* {{{ should_result_empty_when_empty_filelist() */
   it('should_result_empty_when_empty_filelist', function (done) {
@@ -45,5 +53,11 @@ describe('file split', function () {
       done();
     });
   });
+
+  /*
+  afterEach(function (done) {
+    cleanOutput(done);
+  });
+*/
 });
 
