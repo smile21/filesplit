@@ -110,6 +110,9 @@ exports.create = function (flist, prefix, options) {
     reader.on('error', function (error) {
       _complete(iError('StreamReadError', error.stack));
     });
+    reader.on('end', function () {
+      _readfile(flist.shift());
+    });
 
     var _tail = '';
     reader.on('data', function (data) {
@@ -141,10 +144,6 @@ exports.create = function (flist, prefix, options) {
           }
         }
       }
-    });
-
-    reader.on('end', function () {
-      _readfile(flist.shift());
     });
   };
 

@@ -40,6 +40,7 @@ describe('file split', function () {
   });
   /* }}} */
 
+  /* {{{ should_file_split_works_fine() */
   it('should_file_split_works_fine', function (done) {
     var _input  = [__dirname + '/res/test_input_1.txt', __dirname + '/res/test_input_2.txt'];
     var caller  = splitor.create(_input, __dirname + '/res/output', {
@@ -50,14 +51,24 @@ describe('file split', function () {
         'fields'    : [1,0,4,3],
     });
     caller(function (error, result) {
+      should.ok(!error);
+      JSON.stringify(result).should.eql(JSON.stringify({
+        'thedate=20120623'  : [
+        __dirname + '/res/output.thedate=20120623.' + process.pid + '_0',
+        __dirname + '/res/output.thedate=20120623.' + process.pid + '_3',
+        ],
+        'thedate=20120624'  : [
+        __dirname + '/res/output.thedate=20120624.' + process.pid + '_1',
+        __dirname + '/res/output.thedate=20120624.' + process.pid + '_4',
+        ],
+        'thedate=20120625'  : [
+        __dirname + '/res/output.thedate=20120625.' + process.pid + '_2',
+        ],
+      }));
       done();
     });
   });
+  /* }}} */
 
-  /*
-  afterEach(function (done) {
-    cleanOutput(done);
-  });
-*/
 });
 
