@@ -32,5 +32,18 @@ describe('file split', function () {
   });
   /* }}} */
 
+  it('should_file_split_works_fine', function (done) {
+    var _input  = [__dirname + '/test_input_1.txt', __dirname + '/test_input_2.txt'];
+    var caller  = splitor.create(_input, __dirname + '/output/test_input', {
+      'EOF' : String.fromCharCode(1),
+        'bufferSize'    : 1024,
+        'maxLines'      : 30,
+        'routes'    : {'thedate' : 0},
+        'fields'    : [1,0,4,3],
+    });
+    caller(function (error, result) {
+      done();
+    });
+  });
 });
 
