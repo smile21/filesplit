@@ -6,7 +6,7 @@ Always it has the same results as run command `cut -f x,x $filename[s]` before `
 
 # Install #
 ```bash
-npm install filesplit
+$ npm install filesplit
 ```
 
 # Usage #
