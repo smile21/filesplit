@@ -54,15 +54,15 @@ describe('file split', function () {
       should.ok(!error);
       JSON.stringify(result).should.eql(JSON.stringify({
         'thedate=20120623'  : [
-        __dirname + '/res/output.thedate=20120623.' + process.pid + '_0',
-        __dirname + '/res/output.thedate=20120623.' + process.pid + '_3',
+      {'file' : __dirname + '/res/output.thedate=20120623.' + process.pid + '_0',   'rows'  : 30},
+        {'file' : __dirname + '/res/output.thedate=20120623.' + process.pid + '_3', 'rows'  : 12},
         ],
         'thedate=20120624'  : [
-        __dirname + '/res/output.thedate=20120624.' + process.pid + '_1',
-        __dirname + '/res/output.thedate=20120624.' + process.pid + '_4',
+      {'file' : __dirname + '/res/output.thedate=20120624.' + process.pid + '_1', 'rows' : 30},
+      {'file' : __dirname + '/res/output.thedate=20120624.' + process.pid + '_4', 'rows' : 10},
         ],
         'thedate=20120625'  : [
-        __dirname + '/res/output.thedate=20120625.' + process.pid + '_2',
+      {'file' : __dirname + '/res/output.thedate=20120625.' + process.pid + '_2', 'rows' : 28},
         ],
       }));
       done();

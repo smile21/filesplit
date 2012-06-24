@@ -72,9 +72,14 @@ exports.create = function (flist, prefix, options) {
     }
 
     var _fn = Util.format('%s.%s.%d_%d', prefix, idx, process.pid, num);
-    _result[idx].push(_fn);
+    _result[idx].push({'file' : _fn, 'rows' : 0});
 
-    return fs.createWriteStream(_fn);
+    var _me = fs.createWriteStream(_fn);
+    _me.on('error', function (error) {
+      _complete(iError('StreamWriteError', error.stack));
+    });
+
+    return _me;
   };
   /* }}} */
 
@@ -111,18 +116,18 @@ exports.create = function (flist, prefix, options) {
       if (undefined === _wcache[idx]) {
         _wcache[idx]  = txt;
         _writer[idx]  = _createWriter(idx);
-        _wlines[idx]  = 0;
+        _wlines[idx]  = 1;
       } else {
         _wcache[idx] += txt;
+        _wlines[idx] += 1;
       }
-
-      _wlines[idx]++;
 
       if (_wcache[idx].length >= _options.bufferSize || _wlines[idx] >= _options.maxLines) {
         _writer[idx].write(_wcache[idx]);
         _wcache[idx]  = '';
         if (_wlines[idx] >= _options.maxLines) {
           _writer[idx].end();
+          (_result[idx][_result[idx].length - 1]).rows = _wlines[idx];
           _writer[idx] = _createWriter(idx);
           _wlines[idx] = 0;
         }
@@ -136,6 +141,7 @@ exports.create = function (flist, prefix, options) {
     if (!fname) {
       for (var idx in _wcache) {
         _writer[idx].end(_wcache[idx]);
+        (_result[idx][_result[idx].length - 1]).rows = _wlines[idx];
         delete _wcache[idx];
       }
       return _complete(null, _result);
