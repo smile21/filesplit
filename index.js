@@ -91,6 +91,46 @@ exports.create = function (flist, prefix, options) {
   var _wcache   = {};       /**<    缓冲对象, 每个路由值对应一个    */
   var _wlines   = {};       /**<    写入行数, 每个路由值对应一个    */
 
+  /* {{{ function _afterRead() */
+
+  var _tail = '';
+  var _afterRead  = function (data) {
+    if (_tail.length === 0 && data.length === 0) {
+      return;
+    }
+    var rows  = (_tail + data).split(_options.EOL);
+    if (data.length) {
+      _tail = rows.pop();
+    }
+
+    for (var i = 0, m = rows.length; i < m; i++) {
+      var row = rows[i].split(_options.EOF);
+      var idx = _getRoute(row);
+      var txt = _buildRow(row) + _options.EOL;
+
+      if (undefined === _wcache[idx]) {
+        _wcache[idx]  = txt;
+        _writer[idx]  = _createWriter(idx);
+        _wlines[idx]  = 0;
+      } else {
+        _wcache[idx] += txt;
+      }
+
+      _wlines[idx]++;
+
+      if (_wcache[idx].length >= _options.bufferSize || _wlines[idx] >= _options.maxLines) {
+        _writer[idx].write(_wcache[idx]);
+        _wcache[idx]  = '';
+        if (_wlines[idx] >= _options.maxLines) {
+          _writer[idx].end();
+          _writer[idx] = _createWriter(idx);
+          _wlines[idx] = 0;
+        }
+      }
+    }
+  };
+  /* }}} */
+
   var _readfile = function (fname) {
 
     if (!fname) {
@@ -110,40 +150,10 @@ exports.create = function (flist, prefix, options) {
     reader.on('error', function (error) {
       _complete(iError('StreamReadError', error.stack));
     });
+    reader.on('data', _afterRead);
     reader.on('end', function () {
+      _afterRead('');
       _readfile(flist.shift());
-    });
-
-    var _tail = '';
-    reader.on('data', function (data) {
-      var rows  = (_tail + data).split(_options.EOL);
-      _tail  = rows.pop();
-
-      for (var i = 0, m = rows.length; i < m; i++) {
-        var row = rows[i].split(_options.EOF);
-        var idx = _getRoute(row);
-        var txt = _buildRow(row) + _options.EOL;
-
-        if (undefined === _wcache[idx]) {
-          _wcache[idx]  = txt;
-          _writer[idx]  = _createWriter(idx);
-          _wlines[idx]  = 0;
-        } else {
-          _wcache[idx] += txt;
-        }
-
-        _wlines[idx]++;
-
-        if (_wcache[idx].length >= _options.bufferSize || _wlines[idx] >= _options.maxLines) {
-          _writer[idx].write(_wcache[idx]);
-          _wcache[idx]  = '';
-          if (_wlines[idx] >= _options.maxLines) {
-            _writer[idx].end();
-            _writer[idx] = _createWriter(idx);
-            _wlines[idx] = 0;
-          }
-        }
-      }
     });
   };
 
