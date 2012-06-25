@@ -129,7 +129,9 @@ exports.create = function (flist, prefix, options) {
     for (var i = 0, m = rows.length; i < m; i++) {
       var row = rows[i].split(_options.EOF);
       _options.filters.forEach(function (fn, i) {
-        row[i] = fn(row[i]);
+        if (fn) {
+          row[i] = fn(row[i]);
+        }
       });
 
       var idx = _getRoute(row);
