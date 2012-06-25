@@ -9,6 +9,23 @@ var iError = function (name, message) {
   return _me;
 };
 
+exports.trim = function (str) {
+  var m = str.length;
+  for (var i = 0; i < m; i++) {
+    if (str.charCodeAt(i) > 32) {
+      break;
+    }
+  }
+
+  for (var j = m - 1; j > i; j--) {
+    if (str.charCodeAt(j) > 32) {
+      break;
+    }
+  }
+
+  return str.slice(i, j + 1);
+};
+
 exports.create = function (flist, prefix, options) {
 
   /**
@@ -20,6 +37,7 @@ exports.create = function (flist, prefix, options) {
     'encoding'      : null,
     'bufferSize'    : 4 * 1024 * 1024,
     'maxLines'      : 2000000,
+    'filters'       : [],
     'fields'        : [],
     'routes'        : {},
   };
@@ -110,6 +128,10 @@ exports.create = function (flist, prefix, options) {
 
     for (var i = 0, m = rows.length; i < m; i++) {
       var row = rows[i].split(_options.EOF);
+      _options.filters.forEach(function (fn, i) {
+        row[i] = fn(row[i]);
+      });
+
       var idx = _getRoute(row);
       var txt = _buildRow(row) + _options.EOL;
 

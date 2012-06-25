@@ -49,6 +49,7 @@ describe('file split', function () {
         'maxLines'      : 30,
         'routes'    : {'thedate' : 0},
         'fields'    : [1,0,4,3],
+        'filters'   : [splitor.trim],
     });
     caller(function (error, result) {
       should.ok(!error);
