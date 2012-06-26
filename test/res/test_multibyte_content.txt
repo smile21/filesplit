@@ -1,0 +1,6 @@
+1	abcd	我是a中文
+2	abcd	我是a中文
+3	abcd	我是a中文
+4	abcd	我是a中文
+5	abcd	我是a中文
+6	abcd	我是a中文

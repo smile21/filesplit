@@ -7,6 +7,42 @@ var cleanOutput = function (callback) {
   require('child_process').exec('/bin/rm -f ' + __dirname + '/res/output*', {}, callback);
 };
 
+describe('readstream for multibyte characters', function () {
+
+  var fs = require('fs');
+
+  /* {{{ should_read_correct_character_when_set_encoding() */
+  it('should_read_correct_character_when_set_encoding', function (done) {
+    var reader  = fs.createReadStream(__dirname + '/res/test_multibyte_content.txt', {
+      'encoding' : 'utf-8',
+        'bufferSize' : 15,
+    });
+
+    reader.on('end', function () {
+      done();
+    });
+
+    var rows    = 0;
+    reader.on('data', function (data) {
+      rows += 1;
+      switch (rows) {
+        case 1:
+          data.should.eql('1\tabcd\t我是a');
+          break;
+
+        case 2:
+          data.should.eql('中文\n2\tabcd\t');
+          break;
+
+        default:
+          break;
+      }
+    });
+  });
+  /* }}} */
+
+});
+
 describe('file split', function () {
 
   beforeEach(function (done) {
