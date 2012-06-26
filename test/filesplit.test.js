@@ -11,6 +11,36 @@ describe('readstream for multibyte characters', function () {
 
   var fs = require('fs');
 
+  /* {{{ should_read_wrong_character_when_not_set_encoding() */
+  it('should_read_wrong_character_when_not_set_encoding', function (done) {
+    var reader  = fs.createReadStream(__dirname + '/res/test_multibyte_content.txt', {
+      'bufferSize' : 15,
+    });
+
+    reader.on('end', function () {
+      done();
+    });
+
+    var rows    = 0;
+    reader.on('data', function (data) {
+      data  = data.toString();
+      rows += 1;
+      switch (rows) {
+        case 1:
+          data.should.not.eql('1\tabcd\t我是a');
+          break;
+
+        case 2:
+          data.should.not.eql('中文\n2\tabcd\t');
+          break;
+
+        default:
+          break;
+      }
+    });
+  });
+  /* }}} */
+
   /* {{{ should_read_correct_character_when_set_encoding() */
   it('should_read_correct_character_when_set_encoding', function (done) {
     var reader  = fs.createReadStream(__dirname + '/res/test_multibyte_content.txt', {
