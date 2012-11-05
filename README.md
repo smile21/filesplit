@@ -20,13 +20,13 @@ callor(function (error, result) {
 
 # Contributors #
 
-Thanks goes to the people who have contributed code to this module, see the [GitHub Contributors page](https://github.com/aleafs/filesplit/graphs/contributors).
+Thanks goes to the people who have contributed code to this module, see the [GitHub Contributors page](https://github.com/iseeyou1987/filesplit/graphs/contributors).
 
 # License #
 
 (The MIT License)
 
-  Copyright (c) 2012 aleafs and other filesplit contributors
+  Copyright (c) 2012 iseeyou1987 and other filesplit contributors
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
