@@ -23,7 +23,7 @@ exports.trim = function (str) {
     }
   }
 
-  return str.slice(i, j + 1);
+  return str.substring(i, j + 1);
 };
 
 exports.create = function (flist, prefix, options) {
