@@ -11,16 +11,10 @@ var iError = function (name, message) {
 
 exports.trim = function (str) {
   var m = str.length;
-  for (var i = 0; i < m; i++) {
-    if (str.charCodeAt(i) > 32) {
-      break;
-    }
+  for (var i = 0; i < m && str.charCodeAt(i) < 33; i++) {
   }
 
-  for (var j = m - 1; j > i; j--) {
-    if (str.charCodeAt(j) > 32) {
-      break;
-    }
+  for (var j = m - 1; j > i && str.charCodeAt(j) < 33; j--) {
   }
 
   return str.substring(i, j + 1);
