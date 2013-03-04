@@ -32,6 +32,7 @@ exports.create = function (flist, prefix, options) {
     'bufferSize'    : 4 * 1024 * 1024,
     'maxLines'      : 2000000,
     'filters'       : [],
+    'handles'       : [],                   /**<    产出列处理规则 */
     'fields'        : [],
     'routes'        : {},
   };
@@ -40,15 +41,27 @@ exports.create = function (flist, prefix, options) {
   }
 
   /* {{{ function _buildRow() */
-
   if (!Array.isArray(_options.fields) || _options.fields.length < 1) {
-    var _buildRow = new Function('row', Util.format("return row.join('%s');", _options.EOF));
+    function _deal(row) {
+      row.forEach(function (f, i) {
+        if (handles[i]) {
+          row[i] = (handles[i])(f);
+        }
+      });
+    }
+    var _buildRow = new Function(['row', 'handles'], _deal.toString() + '\n_deal(row);\n' + Util.format("return row.join('%s');", _options.EOF));
   } else {
+    function _fn(f, i) {
+      if (handles[i]) {
+        return (handles[i])(f);
+      }
+      return f;
+    }
     var _temp = [];
-    _options.fields.forEach(function (k) {
-      _temp.push(Util.format('row[%d]', k));
+    _options.fields.forEach(function (k, i) {
+      _temp.push(Util.format('_fn(row[%d], %d)', k, i));
     });
-    var _buildRow = new Function('row', 'return ' + _temp.join(Util.format(" + '%s' + ", _options.EOF)) + ';');
+    var _buildRow = new Function(['row', 'handles'], _fn.toString() + '\nreturn ' + _temp.join(Util.format(" + '%s' + ", _options.EOF)) + ';');
   }
 
   /* }}} */
@@ -129,7 +142,7 @@ exports.create = function (flist, prefix, options) {
       });
 
       var idx = _getRoute(row);
-      var txt = _buildRow(row) + _options.EOL;
+      var txt = _buildRow(row, _options.handles) + _options.EOL;
 
       if (undefined === _wcache[idx]) {
         _wcache[idx]  = txt;

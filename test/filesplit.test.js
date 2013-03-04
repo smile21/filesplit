@@ -2,6 +2,7 @@
 
 var should  = require('should');
 var splitor = require(__dirname + '/../');
+var fs = require('fs');
 
 var cleanOutput = function (callback) {
   require('child_process').exec('/bin/rm -f ' + __dirname + '/res/output*', {}, callback);
@@ -9,7 +10,6 @@ var cleanOutput = function (callback) {
 
 describe('readstream for multibyte characters', function () {
 
-  var fs = require('fs');
 
   /* {{{ should_read_wrong_character_when_not_set_encoding() */
   it('should_read_wrong_character_when_not_set_encoding', function (done) {
@@ -137,5 +137,53 @@ describe('file split', function () {
   });
   /* }}} */
 
+  it('should_field_handle_works_fine', function (done) {
+    var _input  = [__dirname + '/res/test_input_1.txt', __dirname + '/res/test_input_2.txt'];
+    var caller  = splitor.create(_input, __dirname + '/res/output', {
+      'EOF' : String.fromCharCode(1),
+      'bufferSize'    : 1024,
+      'maxLines'      : 30,
+      'routes'    : {'thedate' : 0},
+      'fields'    : [1,0,4,3],
+      'filters'   : [splitor.trim],
+      'handles'   : [,,,_S]
+    });
+    function _S(str) {
+      return ['$', str, '$'].join('');
+    }
+    caller(function (error, result) {
+      should.ok(!error);
+      var _content = fs.readFileSync(result['thedate=20120623'][0].file).toString().trim();
+      _content.split('\n').forEach(function (l) {
+        var fields = l.split(String.fromCharCode(1));
+        fields.pop().should.match(/^\$.*\$$/);
+      });
+      done();
+    });
+  });
+
+  it('should_field_handle_works_fine_when_no_fields_given', function (done) {
+    var _input  = [__dirname + '/res/test_input_1.txt', __dirname + '/res/test_input_2.txt'];
+    var caller  = splitor.create(_input, __dirname + '/res/output', {
+      'EOF' : String.fromCharCode(1),
+      'bufferSize'    : 1024,
+      'maxLines'      : 30,
+      'routes'    : {'thedate' : 0},
+      'filters'   : [splitor.trim],
+      'handles'   : [,,,,_S]
+    });
+    function _S(str) {
+      return ['$', str, '$'].join('');
+    }
+    caller(function (error, result) {
+      should.ok(!error);
+      var _content = fs.readFileSync(result['thedate=20120623'][0].file).toString().trim();
+      _content.split('\n').forEach(function (l) {
+        var fields = l.split(String.fromCharCode(1));
+        fields.pop().should.match(/^\$.*\$$/);
+      });
+      done();
+    });
+  });
 });
 
